@@ -1,0 +1,66 @@
+env:
+  database: "postgres"
+  pg_host: kong-postgresql
+  pg_port: 5432
+  pg_user: kong
+  pg_password: kong 
+  pg_database: kong
+  nginx_worker_processes: "1"
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  portal_api_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+  portal_api_error_log: /dev/stderr
+  prefix: /kong_prefix/
+
+admin:
+  enabled: true
+  http:
+    enabled: true
+  tls:
+    enabled: true
+
+proxy:
+  enabled: true
+  type: NodePort
+  http:
+    enabled: true
+    nodePort: 32081
+  tls:
+    enabled: true
+    nodePort: 31443
+
+migrations:
+  preUpgrade: true
+  postUpgrade: true
+  resources:
+    limits:
+      cpu: 1
+      memory: 2G
+    requests:
+      cpu: 0.5
+      memory: 1G
+
+ingressController:
+  enabled: true
+ 
+postgresql:
+  enabled: true
+  postgresqlUsername: kong
+  postgresqlDatabase: kong
+  postgresqlPassword: kong
+  service:
+    port: 5432 
+
+
+resources:
+  limits:
+   cpu: 1
+   memory: 2G
+  requests:
+   cpu: 0.5
+   memory: 1G
+          

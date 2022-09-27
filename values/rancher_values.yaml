@@ -1,0 +1,47 @@
+### ingress ###
+# Readme for details and instruction on adding tls secrets.
+ingress:
+  # If set to false, ingress will not be created
+  # Defaults to true
+  # options: true, false
+  enabled: true
+  includeDefaultExtraAnnotations: true
+  extraAnnotations: {}
+  ingressClassName: ""
+
+  # configurationSnippet - Add additional Nginx configuration. This example statically sets a header on the ingress.
+  # configurationSnippet: |
+  #   more_set_input_headers "X-Forwarded-Host: {{ .Values.hostname }}";
+
+  tls:
+    # options: rancher, letsEncrypt, secret
+    source: rancher
+    secretName: tls-rancher-ingress
+
+### LetsEncrypt config ###
+# ProTip: The production environment only allows you to register a name 5 times a week.
+#         Use staging until you have your config right.
+letsEncrypt:
+  # email: none@example.com
+  environment: production
+  ingress:
+    # options: traefik, nginx
+    class: ""
+# If you are using certs signed by a private CA set to 'true' and set the 'tls-ca'
+# in the 'rancher-system' namespace. See the README.md for details
+privateCA: false
+
+# Number of Rancher server replicas. Setting to negative number will dynamically between 0 and the abs(replicas) based on available nodes.
+# of available nodes in the cluster
+replicas: 1
+
+# Set pod resource requests/limits for Rancher.
+resources: {}
+
+#
+# tls
+#   Where to offload the TLS/SSL encryption
+# - ingress (default)
+# - external
+tls: ingress
+

@@ -1,0 +1,2 @@
+rancher_hostname="rancher.sample.com"
+keycloak_hostname="keycloak.sample.com"

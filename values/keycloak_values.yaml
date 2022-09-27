@@ -1,0 +1,46 @@
+ingress:
+  # If `true`, an Ingress is created
+  enabled: true ## 변경사항
+  # The name of the Ingress Class associated with this ingress
+  ingressClassName: ""
+  # The Service port targeted by the Ingress
+  servicePort: https ## 변경사항
+  # Ingress annotations
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS ## 변경사항
+    kubernetes.io/ingress.class: "nginx" ## 변경사항
+    ## Resolve HTTP 502 error using ingress-nginx:
+    ## See https://www.ibm.com/support/pages/502-error-ingress-keycloak-response
+    # nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+
+  # Additional Ingress labels
+  labels: {}
+   # List of rules for the Ingress
+  rules:
+    -
+      # Ingress host
+      host: 'keycloak.sample.com' ## 도메인 설정
+      # Paths for the host
+      paths:
+        - path: /
+          pathType: Prefix
+  # TLS configuration
+  tls:
+    - hosts:
+        - keycloak.sample.com     ## 도메인 설정
+      secretName: "keycloak-certificates" ## 생성한 인증서 시크릿 이름 설정
+
+---
+postgresql:
+  # If `true`, the Postgresql dependency is enabled
+  enabled: true  ## 변경사항
+  # PostgreSQL User to create
+  postgresqlUsername: keycloak
+  # PostgreSQL Password for the new user
+  postgresqlPassword: keycloak  ##패스워드 설정 (1.2. Master Record Index 참고)
+  # PostgreSQL Database to create
+  postgresqlDatabase: keycloak
+  # PostgreSQL network policy configuration
+  networkPolicy:
+    enabled: false
+ #  storageClass: rook-block # 추가
