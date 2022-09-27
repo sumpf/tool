@@ -67,14 +67,18 @@ func_keycloak(){
 
 func_rke2(){
 
-	echo "install rke2..."
-	ssh rancher_master01
-        swapoff -a
-        systemctl stop ufw
-        systemctl disable ufw
-        iptables -F
-        apt-get install curl -y
-        curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v${rke2_version}+rke2r1 INSTALL_RKE2_TYPE="server" sh -
+        echo "install rke2..."
+        sed -i "s/{rke2_version}/$rke2_version/g" ./script/rke2.sh
+        cat ./script/rke2.sh | ssh vagrant@m1
+        sed -i "s/$rke2_version/{rke2_version}/g" ./script/rke2.sh
+        #sudo -i
+        #swapoff -a
+        #systemctl stop ufw
+        #systemctl disable ufw
+        #iptables -F
+        #apt-get install curl -y
+        #curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v${rke2_version}+rke2r1 INSTALL_RKE2_TYPE="server" sh -
+
 
 }
 
