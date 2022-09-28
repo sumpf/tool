@@ -2,6 +2,7 @@
 
 source ./vars/VERSION
 source ./vars/DOMAIN
+source ./vars/DEFAULT
 
 func_connect(){
 
@@ -9,7 +10,8 @@ func_connect(){
 	ssh-keygen
 
 	for host in $(cat ./vars/hosts | awk -F" " '{print $2}'); do
-		ssh-copy-id $host
+		echo "ssh-copy-id $default_user@$host"
+		ssh-copy-id $default_user@$host
 	done 
 
 }
@@ -21,6 +23,7 @@ func_kubectl(){
         curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
         echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+	rm -f kubectl kubectl.sha256
 }
 
 func_helm(){
@@ -69,7 +72,7 @@ func_rke2(){
 
         echo "install rke2..."
         sed -i "s/{rke2_version}/$rke2_version/g" ./script/rke2.sh
-        cat ./script/rke2.sh | ssh vagrant@m1
+        cat ./script/rke2.sh | ssh $default_user@${master_node01}
         sed -i "s/$rke2_version/{rke2_version}/g" ./script/rke2.sh
         #sudo -i
         #swapoff -a
@@ -82,6 +85,17 @@ func_rke2(){
 
 }
 
+func_rke2_agent(){
+
+	echo "install rke2..."
+
+	read -p 'enter master token : ' token
+
+	sed -i "s/{token}/$token/g" ./templates/rke2_config.yaml
+	cat ./script/rke2_agent.sh | ssh $default_user@${worker_node01}
+	sed -i "s/$token/{token}/g" ./templates/rke2_config.yaml
+
+}
 
 func_rancher(){
 
@@ -116,16 +130,36 @@ func_istio(){
 	istioctl install --set profile=demo --set meshConfig.outboundTrafficPolicy.mode=ALLOW_ANY
 }
 
-func_prometheus()
-{
+func_prometheus(){
 	echo "install prometheus stack..."
 	kubectl create ns monitoring
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update prometheus-community
-	helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --version $promethues_version -n monitoring
+
+	sed -i "s/{storage}/$default_storage/g" ./values/prometheus_values.yaml
+	sed -i "s/{grafana_hostname}/$grafana_hostname}/g" ./values/prometheus_values.yaml
+	sed -i "s/{prometheus_hostname}/$prometheus_hostname}/g" ./values/prometheus_values.yaml
+	sed -i "s/{alertmanager_hostname}/$alertmanager_hostname}/g" ./values/prometheus_values.yaml
+
+	helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --version $promethues_version -n monitoring -f ./values/prometheus_values.yaml
 }
 
+func_init_local(){
 
+	echo "initializing local user..."
+	mkdir $default_home
+	useradd -d $default_home -s /bin/bash $default_user
+	chown -R $default_user:$default_user $default_home
+	usermod -aG sudo $default_user
+	echo "$default_user ALL=NOPASSWD: ALL" >> /etc/sudoers
+}
+
+func_init_remote(){
+
+	echo "initializing remote user..."
+
+
+}
 while true
 do
 

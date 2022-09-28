@@ -1,0 +1,5 @@
+cni:
+  - calico
+tls-san:
+  - "k8s.sample.com"
+

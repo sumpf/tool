@@ -1,2 +1,7 @@
 rancher_hostname="rancher.sample.com"
 keycloak_hostname="keycloak.sample.com"
+gitlab_hostname="gitlab.sample.com"
+alertmanager_hostname="alertmanager.sample.com"
+grafana_hostname="grafana.sample.com"
+prometheus_hostname="prometheus.sample.com"
+

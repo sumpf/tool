@@ -1,0 +1,9 @@
+server: https://{rke2_master_ip_addr}:9345
+token: {token}
+tls-san:
+  - 
+
+cni:
+  - calico
+kubelet-arg:
+  -   

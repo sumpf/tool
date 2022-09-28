@@ -1,0 +1,150 @@
+## aleramagner
+alertmanager:
+  enabled: true
+  ingress: 
+    enabled: true
+    hosts:
+      - {alertmanager_hostname}
+    tls: 
+      - secretName: alertmanager-selfsigned
+        hosts: 
+        - {alertmanager_hostname}
+  service:
+    type: ClusterIP
+    port: 9093
+    targetPort: 9093
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['job']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'null'
+      routes:
+      - match:
+          alertname: TargetDown
+        receiver: 'null'
+    receivers:
+    - name: 'null'
+      webhook_configs: 
+      - url: 'https://hook.dooray.com/services/2509989958368058757/3245791166165587521/_o8Qzag6QLq0QkQIi5GQYg'
+        send_resolved: true
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+  templateFiles: {}
+  alertmanagerSpec:
+    nodeSelector:
+      monitoring: enabled
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {storage}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+
+
+## grafana
+grafana:
+  enabled: true
+  defaultDashboardsTimezone: Asia/Seoul
+  adminPassword: 1234qwer!@#$
+  ingress: 
+    enabled: true
+    hosts:
+      - {grafana_hostname}
+    tls: 
+      - secretName: grafana-selfsigned
+        hosts: 
+        - {grafana_hostname}  
+  service:
+    type: ClusterIP
+  nodeSelector:
+    monitoring: enabled
+  persistence:
+    enabled : true
+    size: 30Gi
+    type: pvc
+    storageClassName: {storage}
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 30Gi
+
+## kube-apiserver
+kubeApiServer:
+  enabled: true
+  serviceMonitor:
+    selector:
+      matchLabels:
+        component: apiserver
+        provider: kubernetes
+
+
+## kubeETCD
+kubeEtcd:
+  enabled: true
+  serviceMonitor:
+    scheme: https
+    insecureSkipVerify: false
+    serverName: localhost
+    caFile: /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+    certFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+    keyFile: /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+
+## kubestateMetrics
+kubeStateMetrics:
+  enabled: true
+
+## NodeExpoertor
+nodeExporter:
+  enabled: true
+  serviceMonitor:
+    relabelings:
+    - regex: (.+)
+      sourceLabels:
+        - __meta_kubernetes_endpoint_node_name
+      targetLabel: node
+
+kubeProxy:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+
+## Prometheus Deploy 
+prometheus:
+  enabled: true
+  ingress: 
+    enabled: true
+    hosts:
+      - {prometheus_hostname}
+    tls: 
+      - secretName: prometheus-selfsigned
+        hosts: 
+        - {prometheus_hostname}  
+  service:
+    type: ClusterIP
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    nodeSelector:
+      monitoring: enabled
+    secrets:
+      - etcd-client-cert
+    retention: 7d
+    additionalScrapeConfigsSecret: 
+      enabled: true
+      key: prometheus-additional.yaml 
+      name: additional-scrape-configs 
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: {storage}
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
