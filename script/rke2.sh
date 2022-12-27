@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo -i
+
 swapoff -a
 apt-get install curl -y
 curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v{rke2_version}+rke2r1 INSTALL_RKE2_TYPE="server" sh -

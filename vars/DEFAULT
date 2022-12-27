@@ -1,15 +1,13 @@
 #!/bin/bash
 
 # user
-default_user="osckorea"
-default_home="/home/osckorea"
+default_user="northstar"
+default_home="/home/northstar"
 
 # storage
-default_storage=""
+default_storage="longhorn"
 
 #k8s
-rancher_master01="rancher_master01"
-rancher_worker01="rancher_worker01"
 master_node01="m1"
 worker_node01="w1"
 

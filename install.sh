@@ -38,6 +38,13 @@ func_helm(){
 
 }
 
+func_k9s(){
+	wget https://github.com/derailed/k9s/releases/download/v0.26.7/k9s_Linux_x86_64.tar.gz
+	tar xvzf k9s_Linux_x86_64.tar.gz
+	mv ./k9s /usr/local/bin
+
+}
+
 func_haproxy(){
 
 	echo "install haproxy..."
@@ -72,16 +79,9 @@ func_rke2(){
 
         echo "install rke2..."
         sed -i "s/{rke2_version}/$rke2_version/g" ./script/rke2.sh
-        cat ./script/rke2.sh | ssh $default_user@${master_node01}
+	./script/rke2.sh
+        #cat ./script/rke2.sh | ssh $default_user@${master_node01}
         sed -i "s/$rke2_version/{rke2_version}/g" ./script/rke2.sh
-        #sudo -i
-        #swapoff -a
-        #systemctl stop ufw
-        #systemctl disable ufw
-        #iptables -F
-        #apt-get install curl -y
-        #curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v${rke2_version}+rke2r1 INSTALL_RKE2_TYPE="server" sh -
-
 
 }
 
@@ -102,6 +102,10 @@ func_rancher(){
 	echo "install rancher..."
 
 	kubectl apply -f  https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.yaml
+	sleep 1m
+	kubectl -n cert-manager rollout status deploy/cert-manager
+	kubectl -n cert-manager rollout status deploy/cert-manager-webhook
+	kubectl get pods --namespace cert-manager
 
         helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
         helm repo update rancher-stable
@@ -129,6 +133,13 @@ func_istio(){
 	curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${istio_version} TARGET_ARCH=x86_64 sh -
 	istioctl install --set profile=demo --set meshConfig.outboundTrafficPolicy.mode=ALLOW_ANY
 }
+
+func_longhorn(){
+	helm repo add longhorn https://charts.longhorn.io
+	helm repo update
+	helm upgrade -i longhorn longhorn/longhorn --namespace longhorn-system --create-namespace
+}
+
 
 func_prometheus(){
 	echo "install prometheus stack..."
@@ -165,26 +176,29 @@ do
 
 	echo ""
 	echo ""
-	echo "========================================= packages =================================================="
-	echo "1. ssh keypair        2. kubectl         3. helm "       
+	echo "====================================== basic setting ==============================================="
+	echo "1. ssh keypair        2. kubectl         3. helm             4. k9s          5. default user "       
 	echo ""
 	echo "========================================= proxy ====================================================="
-	echo "4. haproxy            5. kong "
+	echo "5. haproxy            6. kong "
 	echo ""
 	echo "========================================= auth ======================================================"
-	echo "6. keycloak "
+	echo "7. keycloak "
 	echo ""
 	echo "========================================= rancher ==================================================="
-	echo "7. rke2               8. rancher "
+	echo "8. rke2               9. rancher "
 	echo ""
 	echo "========================================= CI/CD ====================================================="
-	echo "9. gitlab             10. harbor          11. argocd "
+	echo "10. argocd "
 	echo ""
 	echo "======================================== service mesh ==============================================="
-	echo "12. istio             13. kiali           14. jaeger "
+	echo "11. istio "
+	echo ""
+	echo "========================================= storage  ================================================"
+	echo "12. longhorn "
 	echo ""
 	echo "========================================= monitoring ================================================"
-	echo "15. prometheus stack "
+	echo "13. prometheus stack "
 	echo ""
 
 	read -p 'enter a number to install : ' number
@@ -193,18 +207,17 @@ do
 		1) func_connect ;;
         	2) func_kubectl ;;
         	3) func_helm ;;
-		4) func_haproxy ;;
-		5) func_kong ;;
-		6) func_keycloak ;;
-		7) func_rke2 ;;
-		8) func_rancher ;;
-		9) func_gitlab ;;
-		10) func_harbor ;;
+		4) func_k9s ;;
+		5) func_init_local ;;
+		6) func_haproxy ;;
+		7) func_kong ;;
+		8) func_keycloak ;;
+		9) func_rke2 ;;
+		10) func_rancher ;;
 		11) func_argocd ;;
 		12) func_istio ;;
-		13) func_kiali ;;
-		14) func_jaeger ;;
-		15) func_prometheus ;;
+		13) func_longhorn ;;
+		14) func_prometheus ;;
         	*) echo "invalid number" ;;
 	esac
 
