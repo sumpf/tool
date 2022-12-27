@@ -1,5 +1,11 @@
 #!/bin/bash
 
+swapoff -a
+
+systemctl stop ufw
+systemctl disable ufw
+iptables -F
+
 apt-get install curl -y
 curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" sh -
 

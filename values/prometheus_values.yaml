@@ -1,14 +1,14 @@
 ## aleramagner
 alertmanager:
-  enabled: true
+  enabled: false
   ingress: 
-    enabled: true
+    enabled: false
     hosts:
-      - {alertmanager_hostname}
+      - alertmanager.sample.com
     tls: 
       - secretName: alertmanager-selfsigned
         hosts: 
-        - {alertmanager_hostname}
+        - alertmanager.sample.com
   service:
     type: ClusterIP
     port: 9093
@@ -40,11 +40,11 @@ alertmanager:
     storage:
       volumeClaimTemplate:
         spec:
-          storageClassName: {storage}
+          storageClassName: longhorn
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 5Gi
 
 
 
@@ -56,11 +56,11 @@ grafana:
   ingress: 
     enabled: true
     hosts:
-      - {grafana_hostname}
+      - grafana.sample.com
     tls: 
       - secretName: grafana-selfsigned
         hosts: 
-        - {grafana_hostname}  
+        - grafana.sample.com
   service:
     type: ClusterIP
   nodeSelector:
@@ -69,11 +69,11 @@ grafana:
     enabled : true
     size: 30Gi
     type: pvc
-    storageClassName: {storage}
+    storageClassName: longhorn
     accessModes: ["ReadWriteOnce"]
     resources:
       requests:
-        storage: 30Gi
+        storage: 5Gi
 
 ## kube-apiserver
 kubeApiServer:
@@ -121,11 +121,11 @@ prometheus:
   ingress: 
     enabled: true
     hosts:
-      - {prometheus_hostname}
+      - prometheus.sample.com
     tls: 
       - secretName: prometheus-selfsigned
         hosts: 
-        - {prometheus_hostname}  
+        - prometheus.sample.com  
   service:
     type: ClusterIP
   prometheusSpec:
@@ -143,8 +143,8 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: {storage}
+          storageClassName: longhorn
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 5Gi

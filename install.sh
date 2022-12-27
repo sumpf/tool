@@ -43,6 +43,13 @@ func_k9s(){
 	tar xvzf k9s_Linux_x86_64.tar.gz
 	mv ./k9s /usr/local/bin
 
+	apt-get install bash-completion
+	source /usr/share/bash-completion/bash_completion
+	echo 'source <(kubectl completion bash)' >>~/.bashrc
+
+	echo 'alias k=kubectl' >>~/.bashrc
+        echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
+
 }
 
 func_haproxy(){
@@ -147,12 +154,13 @@ func_prometheus(){
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update prometheus-community
 
-	sed -i "s/{storage}/$default_storage/g" ./values/prometheus_values.yaml
-	sed -i "s/{grafana_hostname}/$grafana_hostname}/g" ./values/prometheus_values.yaml
-	sed -i "s/{prometheus_hostname}/$prometheus_hostname}/g" ./values/prometheus_values.yaml
-	sed -i "s/{alertmanager_hostname}/$alertmanager_hostname}/g" ./values/prometheus_values.yaml
+	helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
+	#sed -i "s/{storage}/$default_storage/g" ./values/prometheus_values.yaml
+	#sed -i "s/{grafana_hostname}/$grafana_hostname}/g" ./values/prometheus_values.yaml
+	#sed -i "s/{prometheus_hostname}/$prometheus_hostname}/g" ./values/prometheus_values.yaml
+	#sed -i "s/{alertmanager_hostname}/$alertmanager_hostname}/g" ./values/prometheus_values.yaml
 
-	helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --version $promethues_version -n monitoring -f ./values/prometheus_values.yaml
+	#helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --version $promethues_version -n monitoring -f ./values/prometheus_values.yaml
 }
 
 func_init_local(){
@@ -180,25 +188,28 @@ do
 	echo "1. ssh keypair        2. kubectl         3. helm             4. k9s          5. default user "       
 	echo ""
 	echo "========================================= proxy ====================================================="
-	echo "5. haproxy            6. kong "
+	echo "6. haproxy            7. kong "
 	echo ""
 	echo "========================================= auth ======================================================"
-	echo "7. keycloak "
+	echo "8. keycloak "
 	echo ""
-	echo "========================================= rancher ==================================================="
-	echo "8. rke2               9. rancher "
+	echo "======================================  kubernetes  ==================================================="
+	echo "9. rke2               10. rancher "
 	echo ""
 	echo "========================================= CI/CD ====================================================="
-	echo "10. argocd "
+	echo "11. argocd "
 	echo ""
 	echo "======================================== service mesh ==============================================="
-	echo "11. istio "
+	echo "12. istio "
 	echo ""
 	echo "========================================= storage  ================================================"
-	echo "12. longhorn "
+	echo "13. longhorn "
 	echo ""
 	echo "========================================= monitoring ================================================"
-	echo "13. prometheus stack "
+	echo "14. prometheus stack "
+	echo ""
+	echo "=========================================== exit ================================================"
+	echo "15. exit "
 	echo ""
 
 	read -p 'enter a number to install : ' number
@@ -218,6 +229,7 @@ do
 		12) func_istio ;;
 		13) func_longhorn ;;
 		14) func_prometheus ;;
+		15) exit ;;
         	*) echo "invalid number" ;;
 	esac
 

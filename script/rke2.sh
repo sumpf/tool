@@ -1,8 +1,13 @@
 #!/bin/bash
 
 swapoff -a
+
+systemctl stop ufw
+systemctl disable ufw
+iptables -F
+
 apt-get install curl -y
-curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v{rke2_version}+rke2r1 INSTALL_RKE2_TYPE="server" sh -
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=v1.22.6+rke2r1 INSTALL_RKE2_TYPE="server" sh -
 
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
